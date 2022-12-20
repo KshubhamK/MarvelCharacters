@@ -1,4 +1,4 @@
-package com.shubham.marvel.models.character;
+package com.shubham.marvel.models.apiResponse;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ public class Data
 
     private String count;
 
-    private List<CharacterModel> results = null;
+    private List<ResponseModel> results;
 
     public String getTotal ()
     {
@@ -54,12 +54,12 @@ public class Data
         this.count = count;
     }
 
-    public List<CharacterModel> getResults ()
+    public List<ResponseModel> getResults ()
     {
         return results;
     }
 
-    public void setResults (List<CharacterModel> results)
+    public void setResults (List<ResponseModel> results)
     {
         this.results = results;
     }

@@ -1,5 +1,7 @@
 package com.shubham.marvel.models.character;
 
+import java.util.List;
+
 public class Series
 {
     private String collectionURI;
@@ -8,7 +10,7 @@ public class Series
 
     private String returned;
 
-    private Items[] items;
+    private List<Items> items;
 
     public String getCollectionURI ()
     {
@@ -40,12 +42,12 @@ public class Series
         this.returned = returned;
     }
 
-    public Items[] getItems ()
+    public List<Items> getItems ()
     {
         return items;
     }
 
-    public void setItems (Items[] items)
+    public void setItems (List<Items> items)
     {
         this.items = items;
     }

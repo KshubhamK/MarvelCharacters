@@ -1,9 +1,11 @@
 package com.shubham.marvel.models.character;
 
+import java.util.List;
+
 public class CharacterModel {
     private Thumbnail thumbnail;
 
-    private Urls[] urls;
+    private List<Urls> urls;
 
     private Stories stories;
 
@@ -33,12 +35,12 @@ public class CharacterModel {
         this.thumbnail = thumbnail;
     }
 
-    public Urls[] getUrls ()
+    public List<Urls> getUrls ()
     {
         return urls;
     }
 
-    public void setUrls (Urls[] urls)
+    public void setUrls (List<Urls> urls)
     {
         this.urls = urls;
     }
