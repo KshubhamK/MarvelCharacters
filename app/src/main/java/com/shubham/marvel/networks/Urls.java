@@ -5,4 +5,5 @@ public class Urls {
 
     public final static String GET_CHARACTER_LIST = "v1/public/characters";
     public final static String GET_CHARACTER_DETAILS = "v1/public/characters/{characterId}";
+    public final static String GET_COMICS = "v1/public/comics/{comicId}";
 }

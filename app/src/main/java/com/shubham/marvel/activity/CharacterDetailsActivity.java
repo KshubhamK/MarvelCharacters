@@ -4,6 +4,10 @@ import static com.shubham.marvel.utils.AppConstants.API_KEY;
 import static com.shubham.marvel.utils.AppConstants.HASH;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -15,9 +19,14 @@ import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.shubham.marvel.R;
+import com.shubham.marvel.adapter.MarvelCharacterAdapter;
+import com.shubham.marvel.adapter.MarvelComicsAdapter;
 import com.shubham.marvel.models.apiResponse.ResponseModel;
 import com.shubham.marvel.models.character.CharacterModel;
+import com.shubham.marvel.models.character.Comics;
 import com.shubham.marvel.models.character.Data;
+import com.shubham.marvel.models.character.Items;
+import com.shubham.marvel.models.comics.ComicsModel;
 import com.shubham.marvel.networks.APIClient;
 import com.shubham.marvel.networks.APIInterface;
 
@@ -34,7 +43,11 @@ public class CharacterDetailsActivity extends AppCompatActivity {
     private ImageView iv_image;
     private TextView tv_title;
     private TextView tv_description;
+    private RecyclerView rv_comics;
     private List<CharacterModel> characterModelList;
+    private List<ComicsModel> tempComicList;
+    private List<ComicsModel> comicsModelList = new ArrayList<>();
+    private MarvelComicsAdapter marvelComicsAdapter;
     private String characterId;
     private Activity activity;
 
@@ -50,6 +63,7 @@ public class CharacterDetailsActivity extends AppCompatActivity {
         iv_image = findViewById(R.id.iv_image);
         tv_title = findViewById(R.id.tv_title);
         tv_description = findViewById(R.id.tv_description);
+        rv_comics = findViewById(R.id.rv_comics);
         characterId = getIntent().getStringExtra("characterId");
         Log.e("id", characterId);
         if (characterId != null) {
@@ -119,5 +133,73 @@ public class CharacterDetailsActivity extends AppCompatActivity {
                 tv_description.setText(R.string.no_description);
             }
         }
+        forComics();
+    }
+
+    private void forComics() {
+        if (characterModelList.size() > 0) {
+            for (CharacterModel characterModel : characterModelList) {
+                for (Items items : characterModel.getComics().getItems()) {
+                    String[] url = items.getResourceURI().split("/");
+                    getComicsList(url[6]);
+                }
+            }
+        }
+    }
+
+    private void getComicsList(String id) {
+        apiInterface = APIClient.getClient(activity).create(APIInterface.class);
+        int comicId = Integer.parseInt(id);
+        Call<ResponseModel> call = apiInterface.callGetComicsList(comicId,
+                "1",
+                API_KEY,
+                HASH);
+        Log.e("id2", call.request().toString());
+
+        call.enqueue(new Callback<ResponseModel>() {
+            @Override
+            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                if (response.body() != null && response.body().getData() != null) {
+                    try {
+                        String strJsonOfBody = new Gson().toJson(response.body().getData());
+                        Data data = new Gson().fromJson(strJsonOfBody, Data.class);
+                        tempComicList = new ArrayList<>();
+                        tempComicList.addAll(getStringComicsResultModel(new Gson().toJson(data.getResults())));
+                        Log.e("tempDasta", new Gson().toJson(tempComicList));
+                        comicsModelList.add(tempComicList.get(0));
+                        setViewToComicsList();
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseModel> call, Throwable t) {
+                call.cancel();
+            }
+        });
+    }
+
+    /**
+     * response.toString converted into model
+     * @param jsonArray
+     * @return
+     */
+    List<ComicsModel> getStringComicsResultModel(String jsonArray) {
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<ComicsModel>>() {
+        }.getType();
+        List<ComicsModel> myModelList = gson.fromJson(jsonArray, listType);
+        return myModelList;
+    }
+
+    private void setViewToComicsList() {
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(activity);
+        rv_comics.setLayoutManager(mLayoutManager);
+        rv_comics.setItemAnimator(new DefaultItemAnimator());
+        marvelComicsAdapter = new MarvelComicsAdapter(comicsModelList, activity);
+        rv_comics.setAdapter(marvelComicsAdapter);
     }
 }

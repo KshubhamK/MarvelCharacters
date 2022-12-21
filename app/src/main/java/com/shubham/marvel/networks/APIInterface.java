@@ -1,7 +1,9 @@
 package com.shubham.marvel.networks;
 
+import static com.shubham.marvel.networks.Urls.APP_BASE_URL;
 import static com.shubham.marvel.networks.Urls.GET_CHARACTER_DETAILS;
 import static com.shubham.marvel.networks.Urls.GET_CHARACTER_LIST;
+import static com.shubham.marvel.networks.Urls.GET_COMICS;
 
 import com.shubham.marvel.models.apiResponse.ResponseModel;
 
@@ -23,4 +25,10 @@ public interface APIInterface {
                                               @Query("ts") String ts,
                                               @Query("apikey") String apikey,
                                               @Query("hash") String hash);
+
+    @GET(GET_COMICS)
+    Call<ResponseModel> callGetComicsList(@Path("comicId") int comicId,
+                                          @Query("ts") String ts,
+                                          @Query("apikey") String apikey,
+                                          @Query("hash") String hash);
 }

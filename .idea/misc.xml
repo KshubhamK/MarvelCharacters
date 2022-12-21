@@ -7,6 +7,8 @@
         <entry key="app/src/main/res/layout/activity_character_details.xml" value="0.3098958333333333" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3098958333333333" />
         <entry key="app/src/main/res/layout/rcv_characters_list.xml" value="0.3098958333333333" />
+        <entry key="app/src/main/res/layout/rcv_comics_list.xml" value="0.30885416666666665" />
+        <entry key="app/src/main/res/layout/widget_comics_list.xml" value="0.30885416666666665" />
       </map>
     </option>
   </component>
