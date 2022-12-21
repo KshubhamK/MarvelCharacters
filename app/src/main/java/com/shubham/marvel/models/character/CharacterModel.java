@@ -1,8 +1,15 @@
 package com.shubham.marvel.models.character;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import java.util.List;
 
+@Entity
 public class CharacterModel {
+    @PrimaryKey(autoGenerate = true)
+    private int dbId;
+
     private Thumbnail thumbnail;
 
     private List<Urls> urls;
@@ -24,6 +31,14 @@ public class CharacterModel {
     private String resourceURI;
 
     private Events events;
+
+    public int getDbId() {
+        return dbId;
+    }
+
+    public void setDbId(int dbId) {
+        this.dbId = dbId;
+    }
 
     public Thumbnail getThumbnail ()
     {

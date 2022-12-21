@@ -21,6 +21,7 @@ import com.google.gson.reflect.TypeToken;
 import com.shubham.marvel.R;
 import com.shubham.marvel.adapter.MarvelCharacterAdapter;
 import com.shubham.marvel.customListener.PaginationScrollListener;
+import com.shubham.marvel.database.repositoryDB.CharacterRepository;
 import com.shubham.marvel.models.apiResponse.ResponseModel;
 import com.shubham.marvel.models.character.CharacterModel;
 import com.shubham.marvel.models.character.Data;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
     private RecyclerView rv_characters;
     private List<CharacterModel> characterModelList = new ArrayList<>();
     private MarvelCharacterAdapter marvelCharacterAdapter;
+    private CharacterRepository characterRepository;
     private int recordPerPage = 20;
     private int pageNumber = 0;
     private boolean isLoading = false;
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
     private void initController() {
         activity = MainActivity.this;
         rv_characters = findViewById(R.id.rv_characters);
+        characterRepository = new CharacterRepository(activity);
         setViewToCharacterList();
         getCharactersList(pageNumber, false);
     }
@@ -87,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
                         characterModelList.addAll(getStringCharacterResultModel(new Gson().toJson(data.getResults())));
                         Log.e("strJsonOfBody1", new Gson().toJson(characterModelList));
                         marvelCharacterAdapter.notifyDataSetChanged();
+                        addDataToRoomDataBase();
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -166,5 +170,12 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         Intent intent = new Intent(activity, CharacterDetailsActivity.class);
         intent.putExtra("characterId", characterModelList.get(position).getId());
         startActivity(intent);
+    }
+
+    private void addDataToRoomDataBase() {
+        for (CharacterModel characterModel : characterModelList) {
+            characterRepository.insertUserData(characterModel);
+            Log.e("character", "added");
+        }
     }
 }
