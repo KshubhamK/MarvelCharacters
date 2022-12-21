@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -162,6 +163,8 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
 
     @Override
     public void clickedOnCharacter(View v, int position) {
-
+        Intent intent = new Intent(activity, CharacterDetailsActivity.class);
+        intent.putExtra("characterId", characterModelList.get(position).getId());
+        startActivity(intent);
     }
 }
