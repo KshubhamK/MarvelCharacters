@@ -1,7 +1,7 @@
 package com.shubham.marvel.database.repositoryDB;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -14,6 +14,9 @@ public interface CharacterDBDao {
     @Insert
     Long insertUserData(CharacterModel characterModel);
 
-    @Query("DELETE FROM CharacterTable")
+    @Query("DELETE FROM character_table")
     void deleteCharacterData();
+
+    @Query("SELECT * FROM character_table")
+    LiveData<List<CharacterModel>> getAll();
 }

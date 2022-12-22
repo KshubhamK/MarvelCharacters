@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey;
 
 import java.util.List;
 
-@Entity(tableName = "CharacterTable")
+@Entity(tableName = "character_table")
 public class CharacterModel {
     @PrimaryKey(autoGenerate = true)
     private int dbId;
@@ -159,11 +159,4 @@ public class CharacterModel {
     public void setPhotos(String photos) {
         this.photos = photos;
     }
-
-    @Override
-    public String toString()
-    {
-        return "ClassPojo [thumbnail = "+thumbnail+", urls = "+urls+", stories = "+stories+", series = "+series+", comics = "+comics+", name = "+name+", description = "+description+", modified = "+modified+", id = "+id+", resourceURI = "+resourceURI+", events = "+events+"]";
-    }
-
 }

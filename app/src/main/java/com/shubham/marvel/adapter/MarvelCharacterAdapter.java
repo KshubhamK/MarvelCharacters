@@ -27,6 +27,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.shubham.marvel.R;
 import com.shubham.marvel.database.repositoryDB.CharacterRepository;
 import com.shubham.marvel.models.character.CharacterModel;
+import com.shubham.marvel.utils.AppCommonMethods;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,7 +37,6 @@ import java.util.List;
 public class MarvelCharacterAdapter extends RecyclerView.Adapter<MarvelCharacterAdapter.MyViewHolder> {
     private List<CharacterModel> characterModelList;
     private Activity activity;
-    private CharacterRepository characterRepository;
     private MarvelCharacterAdapter.OnClickInterface onClickInterface;
 
     /**
@@ -50,7 +50,6 @@ public class MarvelCharacterAdapter extends RecyclerView.Adapter<MarvelCharacter
         this.characterModelList = characterModelList;
         this.activity = activity;
         this.onClickInterface = onClickInterface;
-        this.characterRepository = characterRepository;
     }
 
     /**
@@ -93,14 +92,27 @@ public class MarvelCharacterAdapter extends RecyclerView.Adapter<MarvelCharacter
     public void onBindViewHolder(@NonNull MarvelCharacterAdapter.MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
         final CharacterModel characterModel = characterModelList.get(position);
         if (characterModel != null) {
-            if (characterModel.getThumbnail().getPath() != null) {
-                String photo_url = characterModel.getThumbnail().getPath() + "/landscape_xlarge.jpg";
-                if (activity != null && holder.iv_image != null) {
-                    Glide.with(activity)
-                                    .load(photo_url)
-                                            .into(holder.iv_image);
+            if (AppCommonMethods.isNetworkAvailable(activity)) {
+                if (characterModel.getThumbnail().getPath() != null) {
+                    String photo_url = characterModel.getThumbnail().getPath() + "/landscape_xlarge.jpg";
+                    if (activity != null && holder.iv_image != null) {
+                        Glide.with(activity)
+                                .load(photo_url)
+                                .into(holder.iv_image);
+                    }
                 }
             }
+            else {
+                if (characterModel.getPhotos() != null) {
+                    String photo_url = characterModel.getPhotos();
+                    if (activity != null && holder.iv_image != null) {
+                        Glide.with(activity)
+                                .load(photo_url)
+                                .into(holder.iv_image);
+                    }
+                }
+            }
+
             holder.tv_name.setText(characterModel.getName());
         }
 

@@ -6,17 +6,22 @@ import static com.shubham.marvel.utils.AppConstants.HASH;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,6 +40,7 @@ import com.shubham.marvel.models.character.CharacterModel;
 import com.shubham.marvel.models.character.Data;
 import com.shubham.marvel.networks.APIClient;
 import com.shubham.marvel.networks.APIInterface;
+import com.shubham.marvel.utils.AppCommonMethods;
 
 import org.json.JSONObject;
 
@@ -43,7 +49,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -66,15 +74,44 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        activity = MainActivity.this;
         initController();
     }
 
     private void initController() {
-        activity = MainActivity.this;
-        rv_characters = findViewById(R.id.rv_characters);
         characterRepository = new CharacterRepository(activity);
+        rv_characters = findViewById(R.id.rv_characters);
+        checkForNetworkConnection();
+    }
+
+    private void checkForNetworkConnection() {
         setViewToCharacterList();
-        getCharactersList(pageNumber, false);
+        if (AppCommonMethods.isNetworkAvailable(activity)) {
+            characterRepository.deleteAllCharacters();
+            getCharactersList(pageNumber, false);
+            Log.e("Network", "available");
+        }
+        else {
+            getLiveData();
+        }
+    }
+
+    private void getLiveData() {
+        characterRepository.getAllCharacters().observe(MainActivity.this, new Observer<List<CharacterModel>>() {
+            @Override
+            public void onChanged(List<CharacterModel> characterModelList1) {
+                for (CharacterModel characterModel : characterModelList1) {
+                    characterModelList.add(characterModel);
+                    Log.e("Laxmi", new Gson().toJson(characterModel));
+                }
+                setViewToCharacterList();
+            }
+        });
     }
 
     private void getCharactersList(int page, final boolean isLoadMore) {
@@ -130,7 +167,6 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
     }
 
     private void setViewToCharacterList() {
-        characterRepository.deleteAllCharacters();
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(activity, 2);
         rv_characters.setLayoutManager(mLayoutManager);
         rv_characters.setItemAnimator(new DefaultItemAnimator());
