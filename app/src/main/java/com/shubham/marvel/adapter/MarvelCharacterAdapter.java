@@ -93,23 +93,12 @@ public class MarvelCharacterAdapter extends RecyclerView.Adapter<MarvelCharacter
     public void onBindViewHolder(@NonNull MarvelCharacterAdapter.MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
         final CharacterModel characterModel = characterModelList.get(position);
         if (characterModel != null) {
-            String photo_url = null;
             if (characterModel.getThumbnail().getPath() != null) {
-                photo_url = characterModel.getThumbnail().getPath() + "/landscape_xlarge.jpg";
-                String[] imageName = photo_url.split("/");
+                String photo_url = characterModel.getThumbnail().getPath() + "/landscape_xlarge.jpg";
                 if (activity != null && holder.iv_image != null) {
                     Glide.with(activity)
                                     .load(photo_url)
                                             .into(holder.iv_image);
-                    Glide.with(activity)
-                            .asBitmap()
-                            .load(photo_url)
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                    saveToInternalStorage(resource, imageName[10], characterModel);
-                                }
-                            });
                 }
             }
             holder.tv_name.setText(characterModel.getName());
@@ -121,37 +110,6 @@ public class MarvelCharacterAdapter extends RecyclerView.Adapter<MarvelCharacter
                 onClickInterface.clickedOnCharacter(v, position);
             }
         });
-    }
-
-    private String saveToInternalStorage(Bitmap bitmapImage, String imageName, CharacterModel characterModel){
-        ContextWrapper cw = new ContextWrapper(activity);
-        // path to /data/data/yourapp/app_data/imageDir
-        File directory = cw.getDir("Marvel Photos", Context.MODE_PRIVATE);
-        // Create imageDir
-        File mypath=new File(directory,imageName + ".jpg");
-
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(mypath);
-            // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        addDataToRoomDataBase(characterModel, mypath.getAbsolutePath());
-        return directory.getAbsolutePath();
-    }
-
-    private void addDataToRoomDataBase(CharacterModel characterModel, String imagePath) {
-        characterModel.setPhotos(imagePath);
-        characterRepository.insertUserData(characterModel);
-        Log.e("character", "added");
     }
 
     /**

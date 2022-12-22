@@ -3,6 +3,8 @@ package com.shubham.marvel.activity;
 import static com.shubham.marvel.utils.AppConstants.API_KEY;
 import static com.shubham.marvel.utils.AppConstants.HASH;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -11,11 +13,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.shubham.marvel.R;
@@ -30,6 +38,9 @@ import com.shubham.marvel.networks.APIInterface;
 
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
                         characterModelList.addAll(getStringCharacterResultModel(new Gson().toJson(data.getResults())));
                         Log.e("strJsonOfBody1", new Gson().toJson(characterModelList));
                         marvelCharacterAdapter.notifyDataSetChanged();
+                        saveImageFileToStorage();
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -172,5 +184,55 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         startActivity(intent);
     }
 
+    private void saveImageFileToStorage() {
+        String photo_url;
+        if (characterModelList.size() > 0) {
+            for (CharacterModel characterModel : characterModelList) {
+                if (characterModel.getThumbnail().getPath() != null) {
+                    photo_url = characterModel.getThumbnail().getPath() + "/landscape_xlarge.jpg";
+                    String[] imageName = photo_url.split("/");
+                    Glide.with(activity)
+                            .asBitmap()
+                            .load(photo_url)
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    saveToInternalStorage(resource, imageName[10], characterModel);
+                                }
+                            });
+                }
+            }
+        }
+    }
 
+    private String saveToInternalStorage(Bitmap bitmapImage, String imageName, CharacterModel characterModel){
+        ContextWrapper cw = new ContextWrapper(activity);
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("Marvel Photos", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath=new File(directory,imageName + ".jpg");
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        addDataToRoomDataBase(characterModel, mypath.getAbsolutePath());
+        return directory.getAbsolutePath();
+    }
+
+    private void addDataToRoomDataBase(CharacterModel characterModel, String imagePath) {
+        characterModel.setPhotos(imagePath);
+        characterRepository.insertUserData(characterModel);
+        Log.e("character", "added");
+    }
 }
