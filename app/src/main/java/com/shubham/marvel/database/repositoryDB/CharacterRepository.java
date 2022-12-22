@@ -8,6 +8,8 @@ import androidx.room.Room;
 import com.shubham.marvel.database.roomDBAbstract.CharacterDatabase;
 import com.shubham.marvel.models.character.CharacterModel;
 
+import java.util.List;
+
 public class CharacterRepository {
     private static final String DB_NAME = "MarvelCharacterData";
     private CharacterDatabase characterDatabase;
@@ -30,5 +32,9 @@ public class CharacterRepository {
         catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void deleteAllCharacters() {
+        characterDatabase.characterDBDao().deleteCharacterData();
     }
 }

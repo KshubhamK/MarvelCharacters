@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey;
 
 import java.util.List;
 
-@Entity
+@Entity(tableName = "CharacterTable")
 public class CharacterModel {
     @PrimaryKey(autoGenerate = true)
     private int dbId;
@@ -31,6 +31,8 @@ public class CharacterModel {
     private String resourceURI;
 
     private Events events;
+
+    private String photos;
 
     public int getDbId() {
         return dbId;
@@ -148,6 +150,14 @@ public class CharacterModel {
     public void setEvents (Events events)
     {
         this.events = events;
+    }
+
+    public String getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(String photos) {
+        this.photos = photos;
     }
 
     @Override

@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
                         characterModelList.addAll(getStringCharacterResultModel(new Gson().toJson(data.getResults())));
                         Log.e("strJsonOfBody1", new Gson().toJson(characterModelList));
                         marvelCharacterAdapter.notifyDataSetChanged();
-                        addDataToRoomDataBase();
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -119,10 +118,11 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
     }
 
     private void setViewToCharacterList() {
+        characterRepository.deleteAllCharacters();
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(activity, 2);
         rv_characters.setLayoutManager(mLayoutManager);
         rv_characters.setItemAnimator(new DefaultItemAnimator());
-        marvelCharacterAdapter = new MarvelCharacterAdapter(characterModelList, activity, this);
+        marvelCharacterAdapter = new MarvelCharacterAdapter(characterModelList, activity, this, characterRepository);
         rv_characters.setAdapter(marvelCharacterAdapter);
 
         /**
@@ -172,10 +172,5 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         startActivity(intent);
     }
 
-    private void addDataToRoomDataBase() {
-        for (CharacterModel characterModel : characterModelList) {
-            characterRepository.insertUserData(characterModel);
-            Log.e("character", "added");
-        }
-    }
+
 }
