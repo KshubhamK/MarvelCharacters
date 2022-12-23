@@ -19,4 +19,7 @@ public interface CharacterDBDao {
 
     @Query("SELECT * FROM character_table")
     LiveData<List<CharacterModel>> getAll();
+
+    @Query("UPDATE character_table SET isSelected=:booked WHERE id = :id")
+    void update(String booked, String id);
 }

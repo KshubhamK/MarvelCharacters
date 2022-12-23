@@ -102,12 +102,13 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
     }
 
     private void getLiveData() {
+        characterModelList.clear();
         characterRepository.getAllCharacters().observe(MainActivity.this, new Observer<List<CharacterModel>>() {
             @Override
             public void onChanged(List<CharacterModel> characterModelList1) {
                 for (CharacterModel characterModel : characterModelList1) {
                     characterModelList.add(characterModel);
-                    Log.e("Laxmi", new Gson().toJson(characterModel));
+                    Log.e("character", new Gson().toJson(characterModel));
                 }
                 setViewToCharacterList();
             }
@@ -220,6 +221,11 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         startActivity(intent);
     }
 
+    @Override
+    public void longClickListener(View v, int position, CharacterModel characterModel, String booked) {
+        characterRepository.updateCharacterData(booked, characterModel.getId());
+    }
+
     private void saveImageFileToStorage() {
         String photo_url;
         if (characterModelList.size() > 0) {
@@ -268,7 +274,8 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
 
     private void addDataToRoomDataBase(CharacterModel characterModel, String imagePath) {
         characterModel.setPhotos(imagePath);
-        characterRepository.insertUserData(characterModel);
+        characterModel.setIsSelected("no");
+        characterRepository.insertCharacterData(characterModel);
         Log.e("character", "added");
     }
 }

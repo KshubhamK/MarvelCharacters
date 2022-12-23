@@ -4,6 +4,7 @@
     android:layout_width="200dp"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:longClickable="true"
     android:background="@android:color/transparent">
 
     <LinearLayout
@@ -31,7 +32,7 @@
                     android:layout_height="7dp"
                     android:background="@color/red"/>
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@color/black">
@@ -43,7 +44,18 @@
                         android:text="TORI"
                         style="@style/CharacterName"/>
 
-                </LinearLayout>
+                    <ImageView
+                        android:id="@+id/iv_bookmark"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_margin="10dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_gravity="end"
+                        android:visibility="invisible"
+                        android:src="@drawable/ic_baseline_bookmark_added"/>
+
+                </RelativeLayout>
 
             </LinearLayout>
 

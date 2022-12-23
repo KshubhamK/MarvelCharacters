@@ -57,13 +57,14 @@ public class MarvelCharacterAdapter extends RecyclerView.Adapter<MarvelCharacter
      */
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private TextView tv_name;
-        private ImageView iv_image;
+        private ImageView iv_image, iv_bookmark;
         private LinearLayout ll_main;
 
         public MyViewHolder(View view) {
             super(view);
             tv_name = view.findViewById(R.id.tv_name);
             iv_image = view.findViewById(R.id.iv_image);
+            iv_bookmark = view.findViewById(R.id.iv_bookmark);
             ll_main = view.findViewById(R.id.ll_main);
         }
     }
@@ -111,6 +112,13 @@ public class MarvelCharacterAdapter extends RecyclerView.Adapter<MarvelCharacter
                                 .into(holder.iv_image);
                     }
                 }
+
+                if (characterModel.getIsSelected().equalsIgnoreCase("yes")) {
+                    holder.iv_bookmark.setVisibility(View.VISIBLE);
+                }
+                else {
+                    holder.iv_bookmark.setVisibility(View.INVISIBLE);
+                }
             }
 
             holder.tv_name.setText(characterModel.getName());
@@ -120,6 +128,21 @@ public class MarvelCharacterAdapter extends RecyclerView.Adapter<MarvelCharacter
             @Override
             public void onClick(View v) {
                 onClickInterface.clickedOnCharacter(v, position);
+            }
+        });
+
+        holder.ll_main.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if (holder.iv_bookmark.getVisibility() == View.VISIBLE) {
+                    holder.iv_bookmark.setVisibility(View.INVISIBLE);
+                    onClickInterface.longClickListener(view, position, characterModel, "no");
+                }
+                else {
+                    holder.iv_bookmark.setVisibility(View.VISIBLE);
+                    onClickInterface.longClickListener(view, position, characterModel, "yes");
+                }
+                return true;
             }
         });
     }
@@ -138,5 +161,6 @@ public class MarvelCharacterAdapter extends RecyclerView.Adapter<MarvelCharacter
      */
     public interface OnClickInterface {
         void clickedOnCharacter(View v, int position);
+        void longClickListener(View v, int position, CharacterModel characterModel, String booked);
     }
 }

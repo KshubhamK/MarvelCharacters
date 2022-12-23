@@ -32,7 +32,7 @@ public class CharacterRepository {
         this.context = context;
     }
 
-    public void insertUserData(final CharacterModel characterModel) {
+    public void insertCharacterData(final CharacterModel characterModel) {
         try {
             ((Activity)context).runOnUiThread(new Runnable() {
                 @Override
@@ -52,5 +52,9 @@ public class CharacterRepository {
 
     public LiveData<List<CharacterModel>> getAllCharacters() {
         return characterList;
+    }
+
+    public void updateCharacterData(final String booked, final String id) {
+        characterDatabase.characterDBDao().update(booked, id);
     }
 }

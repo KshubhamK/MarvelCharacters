@@ -34,6 +34,8 @@ public class CharacterModel {
 
     private String photos;
 
+    private String isSelected;
+
     public int getDbId() {
         return dbId;
     }
@@ -158,5 +160,13 @@ public class CharacterModel {
 
     public void setPhotos(String photos) {
         this.photos = photos;
+    }
+
+    public String getIsSelected() {
+        return isSelected;
+    }
+
+    public void setIsSelected(String isSelected) {
+        this.isSelected = isSelected;
     }
 }
