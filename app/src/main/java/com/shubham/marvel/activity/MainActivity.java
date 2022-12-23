@@ -2,6 +2,7 @@ package com.shubham.marvel.activity;
 
 import static com.shubham.marvel.utils.AppConstants.API_KEY;
 import static com.shubham.marvel.utils.AppConstants.HASH;
+import static com.shubham.marvel.utils.AppConstants.SET_CHARACTER_ID;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -103,6 +104,9 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         pb_progress = findViewById(R.id.pb_progress);
         srl_toRefresh = findViewById(R.id.srl_to_refresh);
         srl_toRefresh.setOnRefreshListener(this);
+        rv_characters.setVisibility(View.GONE);
+        ll_noNetwork.setVisibility(View.GONE);
+        pb_progress.setVisibility(View.VISIBLE);
         checkForNetworkConnection();
     }
 
@@ -111,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         getMenuInflater().inflate(R.menu.menu_search, menu);
         MenuItem menuItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) menuItem.getActionView();
-        searchView.setQueryHint("Search character...");
+        searchView.setQueryHint(getString(R.string.search_character));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
@@ -127,10 +131,14 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * search characters in the list with name
+     * @param name
+     */
     private void filterSearch(String name) {
         List<CharacterModel> characterModels = new ArrayList<>();
         for (CharacterModel characterModel : characterModelList) {
-            if (characterModel.getName().contains(name)) {
+            if (characterModel.getName().toLowerCase().contains(name.toLowerCase())) {
                 characterModels.add(characterModel);
             }
         }
@@ -146,6 +154,10 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         }
     }
 
+    /**
+     * this function will check 1st that network is available or not
+     * if network not available then data will be fetch from room database
+     */
     private void checkForNetworkConnection() {
         setViewToCharacterList(characterModelList);
         if (AppCommonMethods.isNetworkAvailable(activity)) {
@@ -158,6 +170,9 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         }
     }
 
+    /**
+     * This will fetch all the data asynchronously
+     */
     private void getLiveData() {
         characterModelList.clear();
         characterRepository.getAllCharacters().observe(MainActivity.this, new Observer<List<CharacterModel>>() {
@@ -167,11 +182,25 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
                     characterModelList.add(characterModel);
                     Log.e("character", new Gson().toJson(characterModel));
                 }
-                setViewToCharacterList(characterModelList);
+                if (characterModelList.size() > 0) {
+                    rv_characters.setVisibility(View.VISIBLE);
+                    ll_noNetwork.setVisibility(View.GONE);
+                    setViewToCharacterList(characterModelList);
+                }
+                else {
+                    rv_characters.setVisibility(View.GONE);
+                    ll_noNetwork.setVisibility(View.VISIBLE);
+                    tv_textChange.setText(R.string.no_database);
+                }
             }
         });
     }
 
+    /**
+     * character API is called with page number
+     * @param page
+     * @param isLoadMore
+     */
     private void getCharactersList(int page, final boolean isLoadMore) {
         apiInterface = APIClient.getClient(activity).create(APIInterface.class);
         isLoading = true;
@@ -235,6 +264,10 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         return myModelList;
     }
 
+    /**
+     * data is set to the recyclerview with characterList
+     * @param characterList
+     */
     private void setViewToCharacterList(List<CharacterModel> characterList) {
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(activity, 2);
         rv_characters.setLayoutManager(mLayoutManager);
@@ -287,11 +320,11 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
     public void clickedOnCharacter(View v, int position) {
         if (AppCommonMethods.isNetworkAvailable(activity)) {
             Intent intent = new Intent(activity, CharacterDetailsActivity.class);
-            intent.putExtra("characterId", characterModelList.get(position).getId());
+            intent.putExtra(SET_CHARACTER_ID, characterModelList.get(position).getId());
             startActivity(intent);
         }
         else {
-            Toast.makeText(activity, "Please connect to the network", Toast.LENGTH_LONG).show();
+            Toast.makeText(activity, R.string.please_connect_network, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -300,6 +333,10 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         characterRepository.updateCharacterData(booked, characterModel.getId());
     }
 
+    /**
+     * to store image file into local storage
+     * with the help of Glide image is extracted from photo_url as bitmap and saved to local storage
+     */
     private void saveImageFileToStorage() {
         String photo_url;
         if (characterModelList.size() > 0) {
@@ -321,6 +358,13 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         }
     }
 
+    /**
+     * here folder & path hans been created for image storage
+     * @param bitmapImage
+     * @param imageName
+     * @param characterModel
+     * @return
+     */
     private String saveToInternalStorage(Bitmap bitmapImage, String imageName, CharacterModel characterModel){
         ContextWrapper cw = new ContextWrapper(activity);
         // path to /data/data/yourapp/app_data/imageDir
@@ -346,6 +390,11 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         return directory.getAbsolutePath();
     }
 
+    /**
+     * same path has been taken to the model's photo column to store local storage of image path
+     * @param characterModel
+     * @param imagePath
+     */
     private void addDataToRoomDataBase(CharacterModel characterModel, String imagePath) {
         characterModel.setPhotos(imagePath);
         characterModel.setIsSelected("no");
@@ -353,6 +402,9 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         Log.e("character", "added");
     }
 
+    /**
+     * pull to refresh is called
+     */
     @Override
     public void onRefresh() {
         pageNumber = 0;
@@ -360,8 +412,15 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         rv_characters.setVisibility(View.GONE);
         ll_noNetwork.setVisibility(View.GONE);
         pb_progress.setVisibility(View.VISIBLE);
-        setViewToCharacterList(characterModelList);
-        getCharactersList(pageNumber, false);
+        if (AppCommonMethods.isNetworkAvailable(activity)) {
+            setViewToCharacterList(characterModelList);
+            getCharactersList(pageNumber, false);
+        }
+        else {
+            rv_characters.setVisibility(View.GONE);
+            ll_noNetwork.setVisibility(View.VISIBLE);
+            tv_textChange.setText(R.string.please_connect_network);
+        }
         srl_toRefresh.setRefreshing(false);
     }
 }

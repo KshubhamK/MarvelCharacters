@@ -2,6 +2,7 @@ package com.shubham.marvel.activity;
 
 import static com.shubham.marvel.utils.AppConstants.API_KEY;
 import static com.shubham.marvel.utils.AppConstants.HASH;
+import static com.shubham.marvel.utils.AppConstants.SET_CHARACTER_ID;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -71,13 +72,17 @@ public class CharacterDetailsActivity extends AppCompatActivity {
         rv_comics = findViewById(R.id.rv_comics);
         pb_progress = findViewById(R.id.pb_progress);
         ll_details = findViewById(R.id.ll_details);
-        characterId = getIntent().getStringExtra("characterId");
+        characterId = getIntent().getStringExtra(SET_CHARACTER_ID);
         Log.e("id", characterId);
         if (characterId != null) {
             getCharactersDetails(characterId);
         }
     }
 
+    /**
+     * character details' API called with character Id
+     * @param id
+     */
     private void getCharactersDetails(String id) {
         apiInterface = APIClient.getClient(activity).create(APIInterface.class);
         int charId = Integer.parseInt(id);
@@ -126,6 +131,9 @@ public class CharacterDetailsActivity extends AppCompatActivity {
         return myModelList;
     }
 
+    /**
+     * image and description is set to the screen
+     */
     private void setViewToScreen() {
         if (characterModelList.size() > 0) {
             String photo_url = characterModelList.get(0).getThumbnail().getPath() + "/landscape_xlarge.jpg";
@@ -144,6 +152,9 @@ public class CharacterDetailsActivity extends AppCompatActivity {
         forComics();
     }
 
+    /**
+     * for each and every comics item url is fetched and called
+     */
     private void forComics() {
         if (characterModelList.size() > 0) {
             for (CharacterModel characterModel : characterModelList) {
@@ -155,6 +166,10 @@ public class CharacterDetailsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * comics list API is called with comics ID
+     * @param id
+     */
     private void getComicsList(String id) {
         apiInterface = APIClient.getClient(activity).create(APIInterface.class);
         int comicId = Integer.parseInt(id);
@@ -203,6 +218,9 @@ public class CharacterDetailsActivity extends AppCompatActivity {
         return myModelList;
     }
 
+    /**
+     * comics list is set to the recyclerview
+     */
     private void setViewToComicsList() {
         pb_progress.setVisibility(View.GONE);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(activity);

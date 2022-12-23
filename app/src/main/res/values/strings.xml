@@ -3,4 +3,7 @@
     <string name="no_description">No description available</string>
     <string name="no_character">No character found</string>
     <string name="search">Search</string>
+    <string name="search_character">Search character...</string>
+    <string name="please_connect_network">Please connect to the network</string>
+    <string name="no_database">No database found. \nPlease connect to the network</string>
 </resources>
