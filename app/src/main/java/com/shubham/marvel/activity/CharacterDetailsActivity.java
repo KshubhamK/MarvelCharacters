@@ -12,7 +12,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -44,6 +47,8 @@ public class CharacterDetailsActivity extends AppCompatActivity {
     private TextView tv_title;
     private TextView tv_description;
     private RecyclerView rv_comics;
+    private ProgressBar pb_progress;
+    private LinearLayout ll_details;
     private List<CharacterModel> characterModelList;
     private List<ComicsModel> tempComicList;
     private List<ComicsModel> comicsModelList = new ArrayList<>();
@@ -64,6 +69,8 @@ public class CharacterDetailsActivity extends AppCompatActivity {
         tv_title = findViewById(R.id.tv_title);
         tv_description = findViewById(R.id.tv_description);
         rv_comics = findViewById(R.id.rv_comics);
+        pb_progress = findViewById(R.id.pb_progress);
+        ll_details = findViewById(R.id.ll_details);
         characterId = getIntent().getStringExtra("characterId");
         Log.e("id", characterId);
         if (characterId != null) {
@@ -100,6 +107,7 @@ public class CharacterDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseModel> call, Throwable t) {
+                pb_progress.setVisibility(View.GONE);
                 call.cancel();
             }
         });
@@ -196,10 +204,18 @@ public class CharacterDetailsActivity extends AppCompatActivity {
     }
 
     private void setViewToComicsList() {
+        pb_progress.setVisibility(View.GONE);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(activity);
         rv_comics.setLayoutManager(mLayoutManager);
         rv_comics.setItemAnimator(new DefaultItemAnimator());
         marvelComicsAdapter = new MarvelComicsAdapter(comicsModelList, activity);
         rv_comics.setAdapter(marvelComicsAdapter);
+
+        if (comicsModelList.size() > 0) {
+            ll_details.setVisibility(View.VISIBLE);
+        }
+        else {
+            ll_details.setVisibility(View.GONE);
+        }
     }
 }

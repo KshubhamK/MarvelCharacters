@@ -13,8 +13,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -24,7 +22,14 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import androidx.appcompat.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -60,6 +65,9 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity implements MarvelCharacterAdapter.OnClickInterface {
     private APIInterface apiInterface;
     private RecyclerView rv_characters;
+    private LinearLayout ll_noNetwork;
+    private TextView tv_textChange;
+    private ProgressBar pb_progress;
     private List<CharacterModel> characterModelList = new ArrayList<>();
     private MarvelCharacterAdapter marvelCharacterAdapter;
     private CharacterRepository characterRepository;
@@ -86,11 +94,54 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
     private void initController() {
         characterRepository = new CharacterRepository(activity);
         rv_characters = findViewById(R.id.rv_characters);
+        ll_noNetwork = findViewById(R.id.ll_no_network);
+        tv_textChange = findViewById(R.id.tv_text_change);
+        pb_progress = findViewById(R.id.pb_progress);
         checkForNetworkConnection();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_search, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setQueryHint("Search character...");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                filterSearch(s);
+                return false;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private void filterSearch(String name) {
+        List<CharacterModel> characterModels = new ArrayList<>();
+        for (CharacterModel characterModel : characterModelList) {
+            if (characterModel.getName().contains(name)) {
+                characterModels.add(characterModel);
+            }
+        }
+
+        if (characterModels.size() > 0) {
+            rv_characters.setVisibility(View.VISIBLE);
+            ll_noNetwork.setVisibility(View.GONE);
+            setViewToCharacterList(characterModels);
+        }
+        else {
+            rv_characters.setVisibility(View.GONE);
+            ll_noNetwork.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void checkForNetworkConnection() {
-        setViewToCharacterList();
+        setViewToCharacterList(characterModelList);
         if (AppCommonMethods.isNetworkAvailable(activity)) {
             characterRepository.deleteAllCharacters();
             getCharactersList(pageNumber, false);
@@ -110,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
                     characterModelList.add(characterModel);
                     Log.e("character", new Gson().toJson(characterModel));
                 }
-                setViewToCharacterList();
+                setViewToCharacterList(characterModelList);
             }
         });
     }
@@ -139,7 +190,17 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
                         characterModelList.addAll(getStringCharacterResultModel(new Gson().toJson(data.getResults())));
                         Log.e("strJsonOfBody1", new Gson().toJson(characterModelList));
                         marvelCharacterAdapter.notifyDataSetChanged();
+
+                        if (characterModelList.size() > 0) {
+                            rv_characters.setVisibility(View.VISIBLE);
+                            ll_noNetwork.setVisibility(View.GONE);
+                        }
+                        else {
+                            rv_characters.setVisibility(View.GONE);
+                            ll_noNetwork.setVisibility(View.VISIBLE);
+                        }
                         saveImageFileToStorage();
+                        pb_progress.setVisibility(View.GONE);
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -149,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
 
             @Override
             public void onFailure(Call<ResponseModel> call, Throwable t) {
+                pb_progress.setVisibility(View.GONE);
                 call.cancel();
             }
         });
@@ -167,11 +229,11 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         return myModelList;
     }
 
-    private void setViewToCharacterList() {
+    private void setViewToCharacterList(List<CharacterModel> characterList) {
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(activity, 2);
         rv_characters.setLayoutManager(mLayoutManager);
         rv_characters.setItemAnimator(new DefaultItemAnimator());
-        marvelCharacterAdapter = new MarvelCharacterAdapter(characterModelList, activity, this, characterRepository);
+        marvelCharacterAdapter = new MarvelCharacterAdapter(characterList, activity, this, characterRepository);
         rv_characters.setAdapter(marvelCharacterAdapter);
 
         /**
@@ -180,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         rv_characters.addOnScrollListener(new PaginationScrollListener(mLayoutManager) {
             @Override
             protected void loadMoreItems() {
+                pb_progress.setVisibility(View.VISIBLE);
                 isLoading = true;
                 pageNumber += 1;
                 if (pageNumber == totalPages) {
@@ -216,9 +279,14 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
 
     @Override
     public void clickedOnCharacter(View v, int position) {
-        Intent intent = new Intent(activity, CharacterDetailsActivity.class);
-        intent.putExtra("characterId", characterModelList.get(position).getId());
-        startActivity(intent);
+        if (AppCommonMethods.isNetworkAvailable(activity)) {
+            Intent intent = new Intent(activity, CharacterDetailsActivity.class);
+            intent.putExtra("characterId", characterModelList.get(position).getId());
+            startActivity(intent);
+        }
+        else {
+            Toast.makeText(activity, "Please connect to the network", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override

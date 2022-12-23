@@ -5,12 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/dark_blue"
+    android:gravity="center"
     tools:context=".activity.CharacterDetailsActivity">
 
     <LinearLayout
+        android:id="@+id/ll_details"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/dark_blue"
+        android:visibility="gone"
         android:orientation="vertical">
 
         <ImageView
@@ -59,5 +62,10 @@
             android:layout_marginTop="10dp"/>
 
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/pb_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>
