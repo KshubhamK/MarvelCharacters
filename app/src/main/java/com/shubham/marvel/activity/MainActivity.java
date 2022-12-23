@@ -28,6 +28,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import androidx.appcompat.widget.SearchView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,12 +64,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements MarvelCharacterAdapter.OnClickInterface {
+public class MainActivity extends AppCompatActivity implements MarvelCharacterAdapter.OnClickInterface,
+        SwipeRefreshLayout.OnRefreshListener {
     private APIInterface apiInterface;
     private RecyclerView rv_characters;
     private LinearLayout ll_noNetwork;
     private TextView tv_textChange;
     private ProgressBar pb_progress;
+    private SwipeRefreshLayout srl_toRefresh;
     private List<CharacterModel> characterModelList = new ArrayList<>();
     private MarvelCharacterAdapter marvelCharacterAdapter;
     private CharacterRepository characterRepository;
@@ -97,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         ll_noNetwork = findViewById(R.id.ll_no_network);
         tv_textChange = findViewById(R.id.tv_text_change);
         pb_progress = findViewById(R.id.pb_progress);
+        srl_toRefresh = findViewById(R.id.srl_to_refresh);
+        srl_toRefresh.setOnRefreshListener(this);
         checkForNetworkConnection();
     }
 
@@ -345,5 +351,17 @@ public class MainActivity extends AppCompatActivity implements MarvelCharacterAd
         characterModel.setIsSelected("no");
         characterRepository.insertCharacterData(characterModel);
         Log.e("character", "added");
+    }
+
+    @Override
+    public void onRefresh() {
+        pageNumber = 0;
+        characterModelList.clear();
+        rv_characters.setVisibility(View.GONE);
+        ll_noNetwork.setVisibility(View.GONE);
+        pb_progress.setVisibility(View.VISIBLE);
+        setViewToCharacterList(characterModelList);
+        getCharactersList(pageNumber, false);
+        srl_toRefresh.setRefreshing(false);
     }
 }
